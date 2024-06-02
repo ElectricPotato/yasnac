@@ -16,6 +16,12 @@ A program for directly commanding the ERC manipulator over the serial link. Util
 	Make a pyenv for python 2.7.18
 
 	New usage:
+	python motomoveP --speed=20 -- "0,0,90,0,0,0"
+	this rotates each joint to a specific angle (converts it to encoder pulses and uses PMOVK)
+
+	python motomove_az_el_rand --speed=20 -- ""
+	this points up and faces random aximuth elevations
+
 	python motomove_az_el --speed=20 -- ""
 	This program points the arm up and rotates to face an azimuth and elevation
 	Type an azimuth and elevation like "155 45" (without quotes) after starting the script
