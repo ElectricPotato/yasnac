@@ -1,0 +1,38 @@
+[project]
+name = "sat"
+description = "A small example package"
+version = "0.0.1"
+requires-python = ">=3.7"
+authors = [
+  { name="Example Author", email="author@example.com" },
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+
+dependencies = [
+  "sgp4",
+  "astropy"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pip-tools",
+  "pytest",
+  "black",
+  "flake8",
+  "isort",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.3"
+addopts = "-ra -q"
+testpaths = [
+  "tests",
+]
+
+[tool.isort]
+profile = "black"
+
+[project.urls]
+"Homepage" = "https://example.com/project"
+

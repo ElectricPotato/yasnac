@@ -431,7 +431,7 @@ class ERC(object):
             '02,073': self.handle_file_request,
             '02,080': self.handle_file_request,
         })
-        self.link = serial.Serial(port='/dev/ttyS0',
+        self.link = serial.Serial(port='/dev/ttyUSB0',
                                   baudrate=9600,
                                   bytesize=8,
                                   parity=serial.PARITY_EVEN,

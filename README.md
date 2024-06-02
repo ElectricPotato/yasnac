@@ -13,6 +13,12 @@ This repository is a collection of libraries and programs for working with the v
 A program for directly commanding the ERC manipulator over the serial link. Utilized the un-/under- documented ERC MOVL system control command. Has the optional ability to power the servos up before the motion and then optionally power them down after. The program will block until the motion is complete.
 
 ### Usage
+	Make a pyenv for python 2.7.18
+
+	New usage:
+	python motomove_az_el --speed=20 -- ""
+	This program points the arm up and rotates to face an azimuth and elevation
+	Type an azimuth and elevation like "155 45" (without quotes) after starting the script
 
 	usage: motomove [-h] [--speed [SPEED]] [--power {on,off,onoff}] [-d] position
 	

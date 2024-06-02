@@ -1,0 +1,142 @@
+#!/usr/bin/env python
+""" motomotion: Connect to an ERC-series robot and move the manipulator """
+import argparse
+import sys
+import operator
+import datetime
+
+import erc
+
+MATHOPS = {"+=": operator.add,
+           "-=": operator.sub,
+           "*=": operator.mul,
+           "/=": operator.truediv,
+           "^=": operator.pow}
+
+
+def resolve_maths(given, current_value):
+    """
+    If the given input starts with a math operator symbol, perform that
+    operation on the current value. All numbers, including the return value
+    will be converted to floats with 3 decimal places. If there is no operator
+    symbol, return the input. Examples:
+    resolve_maths("/2", 5) will return "2.500"
+    resolve_maths("2", "5") will return "2.000"
+    """
+    result = given
+
+    if given[0:2] in MATHOPS:
+        a = float(current_value)
+        b = float(given[2:].strip())
+        operation = MATHOPS[given[0:2]]
+        result = operation(a, b)
+
+    return "{:.3f}".format(float(given))
+
+def move_az_el(robot, speed, az, el):
+    speed_string = "{:.2f}".format(speed)
+
+    pulses_per_90deg = [120000, 160000, 121000, 81000, 81000, 51000]
+    
+    #target = robot.execute_command("RPOSJ")[0:6]  # retrieve the current pos
+    #print "original target"
+    #print target
+
+    #my_coordinates = [(3, str(az)), (4, str(el)), (5, "0")] #update only upper 3 axes
+    #my_coordinates = [(0, "-90"), (1, "0"), (2, "87"), (3, str(az)), (4, str(el)), (5, "0")] #update all axes
+    my_coordinates = [-az/2, 0, 90, az/2, el, 0]
+
+    target = [0] * 6
+    for index, coordinate in enumerate(my_coordinates):
+        target[index] = str(coordinate * pulses_per_90deg[index] / 90.0)
+
+    target_string = ",".join(target)
+
+
+
+    robot.execute_command(("PMOVJ {speed},{pos},"
+                           "0,0,0,0,0,0,0").format(speed=speed_string,
+                                                     pos=target_string))
+    robot.execute_command("JWAIT -1")
+
+def main():
+    """
+    primary function for command-line execution. return an exit status integer
+    or a bool type (where True indicates successful exection)
+    """
+    argp = argparse.ArgumentParser(description=(
+        "Connect to an ERC-series robot and move the manipulator"), epilog=(
+        'If you see a "too few arguments" error, try adding "--" before '
+        "your position argument. For example: "
+        'motomove -- "coordinates"'))
+    argp.add_argument('--speed', nargs="?", type=float, default=10.0, help=(
+        "The speed at which the robot is to perform the motion, in mm/s. "
+        "Allowable values are from 0.1 to 1200.00. The default is a glacial "
+        "and safeish 10.0. BE SAFE."))
+    argp.add_argument('--power', choices=('on', 'off', 'onoff'), help=(
+        'Controls servo power; a value of "on" will activate servo power '
+        'in order to perform the motion, a value of "off" will turn the '
+        'servo power off after performing the motion, a value of "onoff" '
+        'will both activate the servo power before the motion and deactivate '
+        'the servo power after the motion is complete. The default is not to '
+        'make any change to the state of servo power.'))
+    argp.add_argument('-d', '--debug', action="store_true", help=(
+        "Enable transaction debugging output"))
+    argp.add_argument('position', help=(
+        "The position to move the robot into. Must be in rectangular "
+        "coordinates and comma separated: x,y,z,tx,ty,tz. tx,ty,tz are tool "
+        "list angles in degrees. If you don't want to specify a particular "
+        'value, leave it empty. You can specify deltas, such as '
+        "+=10.1,-=5,/=3,*=2 for movement relative to the robot's current "
+        "position. NOTE: The resulting values won't be sanity-checked!"))
+    args = argp.parse_args()
+
+    erc.DEBUG = args.debug
+
+    # sanity check
+    if not (0.1 <= args.speed <= 1200.0):
+        print "Invalid speed value, must be between 0.1 and 1200.0"
+        return False
+
+    
+
+    # now actually do stuff
+    robot = erc.ERC()
+
+    # Calculate the 6 target coordinates based on the given argument and
+    # the current position of the robot
+
+    robot_azimuth = - 5 # robot is currently pointing 5 degrees from north
+    #TODO: adjust for unevenness of cart
+
+    import random
+    while True:
+        #move_az_el(robot, args.speed, random.randrange(-50,50), random.randrange(-50,50))
+        
+        
+        az, el = random.randrange(0,360), random.randrange(0,90)
+        print "moving to", az, el
+
+        if el < -10:
+            print "elevation too low, constraining to -10 degrees. Prevously: ", el
+            el = -10 # constrain elevation to 
+
+        el = el - 90 # robot -90 is 0 elevation
+        az = az - robot_azimuth
+        az = (az + 180) % 360 - 180 # constrain azimuth to -180 to +180 range
+
+        if -181 <= az and az <= +181 and -100 <= el and el <= 107:
+            move_az_el(robot, args.speed, az, el)
+        else:
+            print "Azimuth, Elevation out of range (-181 to +181, el = -30 to 197)"
+            print az, el
+
+        #az = -172 to +172, el = -39 to 197
+    
+
+    return True
+
+
+if __name__ == '__main__':
+    RESULT = main()
+    sys.exit(int(not RESULT if isinstance(RESULT, bool) else RESULT))
