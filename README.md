@@ -16,6 +16,9 @@ A program for directly commanding the ERC manipulator over the serial link. Util
 	Make a pyenv for python 2.7.18
 
 	New usage:
+	python motomovecircle --speed=20 -- ""
+	draws a circle
+
 	python motomoveP --speed=20 -- "0,0,90,0,0,0"
 	this rotates each joint to a specific angle (converts it to encoder pulses and uses PMOVK)
 

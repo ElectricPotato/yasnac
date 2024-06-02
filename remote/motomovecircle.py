@@ -120,14 +120,6 @@ def main():
         #robot.execute_command(("MOVJ {},0,{},{},".format(speed, pos, rot) + "0,0," + "0,0,0,0,0,0"))
         robot.execute_command(("MOVL 0,{},0,{},{},0,0,0,0,0,0,0,0".format(speedl, pos, rot)))
 
-
-    robot.execute_command("JWAIT -1")
-
-
-    if False:
-        robot.execute_command(("MOVL 0,{speed},0,{pos},"
-                           "0,0,0,0,0,0,0,0").format(speed=speed_string,
-                                                     pos=target_string))
     robot.execute_command("JWAIT -1")
 
     # shoule we turn off the servos?
